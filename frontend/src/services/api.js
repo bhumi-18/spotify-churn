@@ -1,8 +1,17 @@
 import axios from 'axios'
 
-const API = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || '/api'
-})
+const API = axios.create({ baseURL: '/api' })
 
-export const predictChurn = (data) => API.post('/predict/', data)
-export const getAnalytics = ()     => API.get('/analytics/summary')
+// Existing
+export const predictChurn   = (data) => API.post('/predict/', data)
+export const getAnalytics   = ()     => API.get('/analytics/summary')
+
+// New MongoDB endpoints
+export const getPredictionHistory = (limit = 20) =>
+    API.get(`/predict/history?limit=${limit}`)
+
+export const getPredictionStats = () =>
+    API.get('/predict/stats')
+
+export const submitUserData = (data) =>
+    API.post('/users/submit', data)

@@ -3,6 +3,8 @@ import { createContext, useContext, useState, useEffect } from 'react'
 import Home      from './pages/Home'
 import Predict   from './pages/Predict'
 import Analytics from './pages/Analytics'
+// Add this import at the top
+import History from './pages/History'
 
 // ── Theme Context ────────────────────────────────────────
 export const ThemeContext = createContext()
@@ -85,12 +87,15 @@ export default function App() {
           <NavLink to="/predict"   style={navStyle}>Predict</NavLink>
           <NavLink to="/analytics" style={navStyle}>Analytics</NavLink>
           <ThemeToggle />
+          // Add this NavLink in the nav bar
+          <NavLink to="/history" style={navStyle}>History</NavLink>
         </nav>
 
         <Routes>
           <Route path="/"          element={<Home />}      />
           <Route path="/predict"   element={<Predict />}   />
           <Route path="/analytics" element={<Analytics />} />
+          <Route path="/history" element={<History />} />
         </Routes>
       </BrowserRouter>
     </ThemeContext.Provider>
