@@ -1,96 +1,90 @@
 from fastapi import APIRouter, HTTPException
-from datetime import datetime
-from app.schemas.user_schema import UserFeatures, PredictionResponse, PredictionRecord
+from datetime import datetime, timezone
+
+from app.schemas.user_schema import UserInput
 from app.services.model_service import predict_churn
-from app.database import get_db
+from app.database import predictions_collection
 
 router = APIRouter()
 
-@router.post("/", response_model=PredictionResponse)
-async def predict(user: UserFeatures):
+
+@router.post("/predict/")
+async def predict(user_input: UserInput):
+    """
+    Accept user form data, run the ML model, save input + result to MongoDB,
+    and return the prediction result.
+    """
     try:
-        print("➡️ API HIT")
-        # 1. Run ML prediction
-        result = predict_churn(user.model_dump())
-        print("✅ Prediction done")
-        
-        # 2. Build the complete record to store
-        record = PredictionRecord(
-            # Input data
-            subscription_type     = user.subscription_type,
-            country               = user.country,
-            avg_daily_minutes     = user.avg_daily_minutes,
-            number_of_playlists   = user.number_of_playlists,
-            top_genre             = user.top_genre,
-            skips_per_day         = user.skips_per_day,
-            support_tickets       = user.support_tickets,
-            days_since_last_login = user.days_since_last_login,
-            # Prediction results
-            churn_probability = result["churn_probability"],
-            churn_prediction  = result["churn_prediction"],
-            risk_level        = result["risk_level"],
-            top_risk_factors  = result["top_risk_factors"],
-            recommendation    = result["recommendation"],
+        # 1. Run the ML model
+        result = predict_churn(user_input)
 
-            predicted_at = datetime.utcnow()
-        )
-        print("📦 Record created")
+        # 2. Build the MongoDB document
+        document = {
+            # ── User input ──────────────────────────────
+            "subscription_type":    user_input.subscription_type,
+            "country":              user_input.country,
+            "avg_daily_minutes":    user_input.avg_daily_minutes,
+            "number_of_playlists":  user_input.number_of_playlists,
+            "top_genre":            user_input.top_genre,
+            "skips_per_day":        user_input.skips_per_day,
+            "support_tickets":      user_input.support_tickets,
+            "days_since_last_login": user_input.days_since_last_login,
 
-        # 3. Save to MongoDB (async, non-blocking)
-        db = get_db()
-        print("🧠 DB:", db)
+            # ── Prediction result ────────────────────────
+            "churn_probability":    result["churn_probability"],
+            "churn_prediction":     result["churn_prediction"],
+            "risk_level":           result["risk_level"],
+            "top_risk_factors":     result["top_risk_factors"],
+            "recommendation":       result["recommendation"],
 
-        await db.predictions.insert_one(record.model_dump())
-        print(f"💾 Saved prediction to MongoDB: risk={result['risk_level']}")
+            # ── Metadata ────────────────────────────────
+            "created_at": datetime.now(timezone.utc),
+        }
 
-        # 4. Return result to frontend
+        # 3. Insert into MongoDB
+        insert_result = await predictions_collection.insert_one(document)
+        print(f"✅ Saved prediction to MongoDB with id: {insert_result.inserted_id}")
+
         return result
 
     except Exception as e:
-        print("❌ ERROR:", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Prediction or DB error: {str(e)}")
 
 
-@router.get("/history")
-async def get_prediction_history(limit: int = 50):
-    """Get last N predictions from MongoDB"""
+@router.get("/predictions/")
+async def get_all_predictions():
+    """
+    Return all stored predictions from MongoDB (newest first).
+    """
     try:
-        db = get_db()
-        cursor = db.predictions.find(
-            {},
-            {"_id": 0}   # exclude MongoDB _id field
-        ).sort("predicted_at", -1).limit(limit)
-
-        records = await cursor.to_list(length=limit)
+        cursor = predictions_collection.find().sort("created_at", -1).limit(100)
+        records = []
+        async for doc in cursor:
+            doc["_id"] = str(doc["_id"])                    # make ObjectId JSON-serialisable
+            doc["created_at"] = doc["created_at"].isoformat()
+            records.append(doc)
         return {"total": len(records), "predictions": records}
-
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"DB fetch error: {str(e)}")
 
 
-@router.get("/stats")
+@router.get("/predictions/stats/")
 async def get_prediction_stats():
-    """Live stats from all stored predictions"""
+    """
+    Return quick summary stats from stored predictions.
+    """
     try:
-        db = get_db()
-        total = await db.predictions.count_documents({})
-        high  = await db.predictions.count_documents({"risk_level": "High"})
-        med   = await db.predictions.count_documents({"risk_level": "Medium"})
-        low   = await db.predictions.count_documents({"risk_level": "Low"})
+        total = await predictions_collection.count_documents({})
+        churned = await predictions_collection.count_documents({"churn_prediction": True})
+        not_churned = total - churned
 
-        # Average churn probability
-        pipeline = [{"$group": {"_id": None,
-                                "avg_prob": {"$avg": "$churn_probability"}}}]
-        avg_result = await db.predictions.aggregate(pipeline).to_list(1)
-        avg_prob = round(avg_result[0]["avg_prob"] * 100, 1) if avg_result else 0
+        churn_rate = round((churned / total * 100), 2) if total > 0 else 0
 
         return {
             "total_predictions": total,
-            "high_risk":   high,
-            "medium_risk": med,
-            "low_risk":    low,
-            "avg_churn_probability": avg_prob,
+            "churned_count": churned,
+            "not_churned_count": not_churned,
+            "churn_rate_percent": churn_rate,
         }
-
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"Stats error: {str(e)}")

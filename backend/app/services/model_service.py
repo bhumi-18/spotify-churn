@@ -12,28 +12,37 @@ country_encoder = joblib.load(os.path.join(BASE, 'country_encoder.pkl'))
 FEATURES        = joblib.load(os.path.join(BASE, 'features.pkl'))
 
 RECOMMENDATIONS = {
-    "High": "🚨 Immediate action needed: offer a discount, send a re-engagement email, or provide a free Premium trial.",
+    "High":   "🚨 Immediate action needed: offer a discount, send a re-engagement email, or provide a free Premium trial.",
     "Medium": "⚠️ Monitor closely: send personalised playlist recommendations and in-app nudges.",
-    "Low": "✅ User is healthy: continue standard engagement and periodic check-ins.",
+    "Low":    "✅ User is healthy: continue standard engagement and periodic check-ins.",
 }
 
-def predict_churn(data: dict) -> dict:
+def predict_churn(data) -> dict:
+    """
+    Accepts either a Pydantic UserInput object or a plain dict.
+    """
+    # Support both Pydantic objects and plain dicts
+    if hasattr(data, '__dict__'):
+        get = lambda key: getattr(data, key)
+    else:
+        get = lambda key: data[key]
+
     # Encode categoricals
-    is_premium      = 1 if data['subscription_type'] == 'Premium' else 0
-    genre_encoded   = int(genre_encoder.transform([data['top_genre']])[0])
-    country_encoded = int(country_encoder.transform([data['country']])[0])
+    is_premium      = 1 if get('subscription_type') == 'Premium' else 0
+    genre_encoded   = int(genre_encoder.transform([get('top_genre')])[0])
+    country_encoded = int(country_encoder.transform([get('country')])[0])
 
     # Feature engineering (must match training)
-    avg_daily_minutes     = max(0, data['avg_daily_minutes'])
-    engagement_score      = avg_daily_minutes / (data['skips_per_day'] + 1)
-    risk_score            = data['days_since_last_login'] * data['support_tickets'] + data['skips_per_day']
+    avg_daily_minutes = max(0, get('avg_daily_minutes'))
+    engagement_score  = avg_daily_minutes / (get('skips_per_day') + 1)
+    risk_score        = get('days_since_last_login') * get('support_tickets') + get('skips_per_day')
 
     row = {
         'avg_daily_minutes':     avg_daily_minutes,
-        'number_of_playlists':   data['number_of_playlists'],
-        'skips_per_day':         data['skips_per_day'],
-        'support_tickets':       data['support_tickets'],
-        'days_since_last_login': data['days_since_last_login'],
+        'number_of_playlists':   get('number_of_playlists'),
+        'skips_per_day':         get('skips_per_day'),
+        'support_tickets':       get('support_tickets'),
+        'days_since_last_login': get('days_since_last_login'),
         'is_premium':            is_premium,
         'genre_encoded':         genre_encoded,
         'country_encoded':       country_encoded,
@@ -41,7 +50,7 @@ def predict_churn(data: dict) -> dict:
         'risk_score':            risk_score,
     }
 
-    df = pd.DataFrame([row])[FEATURES]
+    df        = pd.DataFrame([row])[FEATURES]
     df_scaled = scaler.transform(df)
 
     prob       = float(model.predict_proba(df_scaled)[0][1])
