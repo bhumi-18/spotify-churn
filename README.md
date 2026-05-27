@@ -49,23 +49,23 @@ Full-stack ML app — FastAPI backend + React frontend — trained on real Spoti
 
 # Features and Functionality
 Features
-🎯 ML-based Spotify customer churn prediction
-📊 Interactive analytics dashboard with churn insights
-⚡ Real-time prediction using FastAPI REST API
-🧠 Automated feature engineering and preprocessing
-🛡️ Input validation with Pydantic schemas
-📈 Risk classification with retention recommendations
-🌐 Full-stack architecture using React + FastAPI
-🚀 Deployment-ready with Vercel and Render support
-📚 Auto-generated API docs using Swagger UI
+🎯 ML-based Spotify customer churn prediction                                                                               
+📊 Interactive analytics dashboard with churn insights                                                                      
+⚡ Real-time prediction using FastAPI REST API                                                                              
+🧠 Automated feature engineering and preprocessing                                                                          
+🛡️ Input validation with Pydantic schemas                                                                                   
+📈 Risk classification with retention recommendations                                                                       
+🌐 Full-stack architecture using React + FastAPI                                                                            
+🚀 Deployment-ready with Vercel and Render support                                                                          
+📚 Auto-generated API docs using Swagger UI                                                                                 
 
 Functionalities
-Predicts churn probability and risk level for Spotify users
-Processes user behavior data for ML inference
-Displays churn analytics by genre, country, and subscription type
-Shows feature importance and model performance metrics
-Handles API validation, error responses, and JSON communication
-Provides responsive frontend UI with interactive forms and charts
+Predicts churn probability and risk level for Spotify users                                                                  
+Processes user behavior data for ML inference                                                                                
+Displays churn analytics by genre, country, and subscription type                                                           
+Shows feature importance and model performance metrics                                                                       
+Handles API validation, error responses, and JSON communication                                                              
+Provides responsive frontend UI with interactive forms and charts                                                            
 
 ## Dataset Features Used
 | Column | Type | Description |
