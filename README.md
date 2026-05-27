@@ -1,6 +1,52 @@
 # 🎵 Spotify Customer Churn Prediction
+The Spotify Customer Churn Prediction System is a full-stack machine learning application
+designed to help Spotify's business teams identify users at risk of churning. The system ingests
+user behavioral features — including listening habits, engagement patterns, and support activity
+— and outputs a churn probability score, a risk classification, and actionable retention
+recommendations.
+The system is a new, standalone full-stack application developed as an academic project. It is not
+a replacement for any existing Spotify internal tooling but rather a prototype demonstrating how
+machine learning can be integrated into a production-style web system. 
+
+# Technology Stack and Tools Used
+🧠 Machine Learning
+scikit-learn  - 1.5.1
+GradientBoostingClassifier
+StandardScaler
+LabelEncoder
+pandas        -  2.2.2
+numpy         -  1.26.4
+joblib        -  1.4.2
+
+⚙️ Backend
+Python        -  3.11
+FastAPI       -  0.115.0
+Uvicorn       -  0.30.6
+Pydantic      -  2.8.2
+python-multipart - 0.0.9
+
+🎨 Frontend
+React         -  18.3.1
+Vite          -  5.3.4
+React Router DOM - 6.25.1
+Axios         -  1.7.2
+Recharts      -  2.12.7
+
+🗂️ Data
+CSV file
+JSON file
+.pkl files
+
+🛠️ Dev Tools
+VS Code
+Git
+npm
+pip
+Python venv
+Swagger UI
 
 Full-stack ML app — FastAPI backend + React frontend — trained on real Spotify user data.
+
 
 ## Dataset Features Used
 | Column | Type | Description |
