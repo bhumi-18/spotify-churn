@@ -70,7 +70,7 @@ Full-stack ML app — FastAPI backend + React frontend — trained on real Spoti
 
 ---
 
-## 🚀 Setup & Run
+## 🚀 Steps to Run the Project
 
 ### Backend
 
@@ -164,3 +164,6 @@ spotify-churn/
     ├── package.json
     └── vite.config.js
 ```
+# Team Members
+Bhumi Wadhwani - EN23CS301265
+Ayushi Ralhan  - EN23CS301251 
