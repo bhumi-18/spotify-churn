@@ -165,5 +165,5 @@ spotify-churn/
     └── vite.config.js
 ```
 # Team Members
-Bhumi Wadhwani - EN23CS301265
+Bhumi Wadhwani - EN23CS301265                                                                                                
 Ayushi Ralhan  - EN23CS301251 
