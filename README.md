@@ -16,26 +16,26 @@ StandardScaler ,
 LabelEncoder ,
 pandas        -  2.2.2 ,
 numpy         -  1.26.4 ,
-joblib        -  1.4.2 ,
+joblib        -  1.4.2
 
 ⚙️ Backend                                                                                                                  
 Python        -  3.11 ,
 FastAPI       -  0.115.0 ,
 Uvicorn       -  0.30.6 , 
 Pydantic      -  2.8.2 , 
-python-multipart - 0.0.9 , 
+python-multipart - 0.0.9 
 
 🎨 Frontend                                                                                                                 
 React         -  18.3.1 , 
 Vite          -  5.3.4 , 
 React Router DOM - 6.25.1 , 
 Axios         -  1.7.2 , 
-Recharts      -  2.12.7 , 
+Recharts      -  2.12.7 
 
 🗂️ Data                                                                                                                     
 CSV file , 
 JSON file , 
-.pkl files , 
+.pkl files 
 
 🛠️ Dev Tools                                                                                                                
 VS Code , 
@@ -43,7 +43,7 @@ Git ,
 npm , 
 pip , 
 Python venv , 
-Swagger UI , 
+Swagger UI 
 
 Full-stack ML app — FastAPI backend + React frontend — trained on real Spotify user data.
 
